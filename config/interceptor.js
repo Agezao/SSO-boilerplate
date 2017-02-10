@@ -1,23 +1,33 @@
 'use strict'
 
 import config from './env';
-import ResponseFactory from '../src/factories/responseFactory';
+import ResponseFactory from '../src/factories/response.factory';
+import TokenBusiness from '../src/business/token.business';
 
 const _responseFactory = new ResponseFactory();
+const _tokenBusiness = new TokenBusiness();
 
-function intercept(err, req, res, next) {
-
+function intercept(req, res, next) {
 	if(config.unsecuredRoutes.indexOf(req.path) >= 0)
 		return next();
 
 	if(!req.headers['authorization-token'])
 		return res.status(403).send(_responseFactory.fail(-1, "No Token presented"));
 
-	//TO-DO
-	// Check token existence && Expiration Date
-	// If is valid, add userId to req.decoded._id = xx
-	// If it's NOT valid, retorn 403
-	next();
+	let token = req.headers['authorization-token'];
+
+	_tokenBusiness.get(token)
+		.then(tokenData => {
+			if(!tokenData || new Date() > tokenData.expire)
+				return res.status(403).send(_responseFactory.fail(-1, "Ivalid Token"));
+
+			_tokenBusiness.refresh(tokenData);
+			req.decoded._id = tokenData.user_id;
+			next();
+		})
+		.catch(err => {
+			return res.status(500).send(_responseFactory.fail(-1, err.message));
+		});
 }
 
 export default intercept;

@@ -2,13 +2,12 @@ import Promise from 'bluebird';
 import mongoose from 'mongoose';
 
 /**
- * User Schema
+ * Token Schema
  */
-const UserSchema = new mongoose.Schema({
-  name: { type: 'String', required: true },
-  email:  { type: 'String', required: true, unique: true },
-  password: { type: 'String', required: true },
-  created: { type: Date, default: Date.now }
+const TokenSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  expire: { type: Date, required: true },
+  date: { type: Date, default: Date.now }
 });
 
 
@@ -22,12 +21,12 @@ const UserSchema = new mongoose.Schema({
 /**
  * Methods
  */
-UserSchema.method({ });
+TokenSchema.method({ });
 
 /**
  * Statics
  */
-UserSchema.statics = { 
+TokenSchema.statics = { 
   get(params) {
     if(typeof(params) === 'object')
       return this.find(params)
@@ -42,10 +41,9 @@ UserSchema.statics = {
 
     return model.save();
   }
-  
 };
 
 /**
- * @typedef User
+ * @typedef Token
  */
-export default mongoose.model('User', UserSchema);
+export default mongoose.model('Token', TokenSchema);

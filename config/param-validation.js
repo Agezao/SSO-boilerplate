@@ -20,7 +20,7 @@ export default {
   // UPDATE /api/user
   updateUser: {
     body: {
-      email: Joi.string().required()
+      name: Joi.string().required()
     }
   },
 

@@ -3,7 +3,7 @@ import httpStatus from 'http-status';
 import crypto from 'crypto';
 import APIError from '../helpers/APIError';
 import User from '../models/user.model';
-import ResponseFactory from '../factories/responseFactory'
+import ResponseFactory from '../factories/response.factory'
 
 
 const _responseFactory = new ResponseFactory();
