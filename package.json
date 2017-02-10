@@ -1,13 +1,13 @@
 {
-  "name": "colorbucket-api",
-  "description": "The Api for the ColorBucket Product",
+  "name": "sso-boilerplate",
+  "description": "SSO boilerplate with NodeJs, ES6, Express, Mocha Tests, MongoDb",
   "version": "1.0.0",
-  "homepage": "https://github.com/colorbucket/colorbucket-api",
+  "homepage": "https://github.com/Agezao/SSO-boilerplate",
   "author": {
     "name": "Gabriel Rodrigues",
     "email": "0800.grc@gmail.com"
   },
-  "main": "index.js",
+  "main": "server.js",
   "private": true,
   "engines": {
     "node": ">=4.6.0",
