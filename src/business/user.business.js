@@ -9,8 +9,11 @@ class UserBusiness {
 
 	constructor() { }
 
-    get(id) {
-        return User.get(id);
+    /*
+    * Params could be either a json or a single Id
+    */
+    get(params) {
+        return User.get(params);
     };
 
     update(uservm) {
@@ -26,6 +29,14 @@ class UserBusiness {
 
         return User.update({_id: uservm._id}, {$set: { password: uservm.password }});
     };
+
+    checkPassword(uservm, password) {
+        let hashPassword = crypto.createHmac('sha256', config.secret)
+                               .update(password)
+                               .digest('hex');
+
+       return uservm.password === hashPassword;
+    }
 
     create(uservm) {
         let hashPassword = crypto.createHmac('sha256', config.secret)
