@@ -1,13 +1,10 @@
-import jwt from 'jsonwebtoken';
 import httpStatus from 'http-status';
-import crypto from 'crypto';
 import APIError from '../helpers/APIError';
-import User from '../models/user.model';
+import UserBusiness from '../business/user.business';
+import TokenBusiness from '../business/token.business';
 import ResponseFactory from '../factories/response.factory'
 
-
 const _responseFactory = new ResponseFactory();
-const config = require('../../config/env');
 
 
 /**
@@ -18,32 +15,30 @@ const config = require('../../config/env');
  * @returns {*}
  */
 function login(req, res, next) {
+    const userBusiness = new UserBusiness();
+    const tokenBusiness = new TokenBusiness();
 
-  User.get({username: req.body.username})
-    .then(users => {
-      const err = new APIError('Authentication error', httpStatus.UNAUTHORIZED);
-      
-      let user = users[0];
+    userBusiness.get({
+        email: req.body.email
+    })
+    .then(vm => {
+        const err = new APIError('Invalid Email/Password', httpStatus.UNAUTHORIZED);
 
-      if(!user)
-        return next(err);
+        if(!vm || vm.length == 0)
+            return next(err);
 
-      let hashPassword = crypto.createHmac('sha256', config.jwtSecret)
-                         .update(req.body.password)
-                         .digest('hex');
+        if(!userBusiness.checkPassword(vm[0], req.body.password))
+            return next(err);
 
-      if(user.password == hashPassword) {
-        const token = jwt.sign({
-          username: user.username,
-          _id: user._id
-        }, config.jwtSecret);
-        return res.json(_responseFactory.sucess({
-          token,
-          username: user.username
-        }));
-      }
+        tokenBusiness.create(req.decoded._id)
+            .then(token => {
+                delete vm[0]['password'];
 
-      return next(err);
+                res.json(_responseFactory.success({
+                    token: token,
+                    user: vm[0]
+                }));
+            }).catch(e => next(e));
     })
     .catch(e => next(e));
 }
@@ -56,33 +51,28 @@ function login(req, res, next) {
  * @returns {*}
  */
 function signup(req, res, next) {
-  const user = new User({
-    name:  req.body.name,
-    username: req.body.username,
-    email: req.body.email,
-    password: req.body.password,
-    about: req.body.about
-  });
+    const userBusiness = new UserBusiness();
+    const tokenBusiness = new TokenBusiness();
+    const userModel = {
+        name:  req.body.name,
+        email: req.body.email,
+        password: req.body.password
+    };
 
-  let hashPassword = crypto.createHmac('sha256', config.jwtSecret)
-                       .update(user.password)
-                       .digest('hex');
+    userBusiness.create(userModel)
+        .then(uservm => {
+            tokenBusiness.create(uservm._id)
+            .then(token => {
+                delete uservm['password'];
 
-  user.password = hashPassword;
-
-  user.save()
-    .then(savedUser => {
-      const token = jwt.sign({
-        username: savedUser.username,
-        _id: user._id
-      }, config.jwtSecret);
-
-      res.json(_responseFactory.sucess({
-        token,
-        user: savedUser
-      }));
-    })
-    .catch(e => next(e));
+                res.json(_responseFactory.success({
+                    token: token,
+                    user: uservm
+                }));
+            })
+            .catch(e => next(e));    
+        })
+        .catch(e => next(e));
 }
 
 export default { login, signup };
