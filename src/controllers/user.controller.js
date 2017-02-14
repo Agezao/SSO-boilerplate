@@ -1,6 +1,7 @@
 'use srict';
 
 import UserBusiness from '../business/user.business';
+import TokenBusiness from '../business/token.business';
 import ResponseFactory from '../factories/response.factory'
 
 const _responseFactory = new ResponseFactory();
@@ -13,6 +14,7 @@ const _userBusiness = new UserBusiness();
 function get(req, res) {
   _userBusiness.get(req.decoded._id)
     .then(user => {
+      delete user['password'];
       res.json(_responseFactory.sucess(user));
     })
     .catch(e => next(e));
@@ -33,7 +35,8 @@ function create(req, res, next) {
   };
 
   _userBusiness.create(uservm)
-    .then(savedUser => { 
+    .then(savedUser => {
+      delete user['password'];
       res.json(_responseFactory.sucess(savedUser)) 
     })
     .catch(e => next(e));
@@ -41,8 +44,9 @@ function create(req, res, next) {
 
 /**
  * Update existing user
- * @property {string} req.body.username - The username of user.
- * @property {string} req.body.mobileNumber - The mobileNumber of user.
+ * @property {string} req.body.name - The name of user.
+ * @property {string} req.body.email - The email of user.
+ * @property {string} req.body.password - The password of user.
  * @returns {User}
  */
 function update(req, res, next) {
@@ -50,7 +54,10 @@ function update(req, res, next) {
   user.name = req.body.name;
 
   _userBusiness.update(user)
-    .then(savedUser => res.json(_responseFactory.sucess(savedUser)))
+    .then(savedUser => {
+      delete user['password'];
+      res.json(_responseFactory.sucess(savedUser))
+    })
     .catch(e => next(e));
 }
 
@@ -60,7 +67,13 @@ function update(req, res, next) {
  */
 function remove(req, res, next) {
   _userBusiness.remove(req.decoded._id)
-    .then(status => res.json(_responseFactory.sucess()))
+    .then(status => {
+      const tokenBusiness = new TokenBusiness();
+
+      tokenBusiness.removeByUser(req.decoded._id);
+
+      res.json(_responseFactory.sucess(status))
+    })
     .catch(e => next(e));
 }
 
