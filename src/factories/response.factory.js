@@ -23,7 +23,7 @@ class ResponseFactory {
         return responseObject;
     };
 
-    sucess(responseData = null){
+    success(responseData = null){
         var responseObject = this.defaultResponseObject();
 
         responseObject.success = true;

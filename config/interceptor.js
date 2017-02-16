@@ -22,7 +22,8 @@ function intercept(req, res, next) {
 				return res.status(403).send(_responseFactory.fail(-1, "Ivalid Token"));
 
 			_tokenBusiness.refresh(tokenData);
-			req.decoded._id = tokenData.user_id;
+			req.decoded = { _id: tokenData.user_id.toString() };
+			
 			next();
 		})
 		.catch(err => {

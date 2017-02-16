@@ -8,7 +8,7 @@ const _responseFactory = new ResponseFactory();
 
 
 /**
- * Returns jwt token if valid username and password is provided
+ * Returns token if valid username and password is provided
  * @param req
  * @param res
  * @param next
@@ -30,13 +30,11 @@ function login(req, res, next) {
         if(!userBusiness.checkPassword(vm[0], req.body.password))
             return next(err);
 
-        tokenBusiness.create(req.decoded._id)
+        tokenBusiness.create(vm[0]._id)
             .then(token => {
-                delete vm[0]['password'];
-
                 res.json(_responseFactory.success({
-                    token: token,
-                    user: vm[0]
+                    token: token._id,
+                    user: vm[0].toObject()
                 }));
             }).catch(e => next(e));
     })
@@ -44,7 +42,7 @@ function login(req, res, next) {
 }
 
 /**
- * Returns jwt token if valid signup
+ * Returns token if valid signup
  * @param req
  * @param res
  * @param next
@@ -63,11 +61,9 @@ function signup(req, res, next) {
         .then(uservm => {
             tokenBusiness.create(uservm._id)
             .then(token => {
-                delete uservm['password'];
-
                 res.json(_responseFactory.success({
-                    token: token,
-                    user: uservm
+                    token: token._id,
+                    user: uservm.toObject()
                 }));
             })
             .catch(e => next(e));    

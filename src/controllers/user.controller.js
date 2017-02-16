@@ -11,11 +11,10 @@ const _userBusiness = new UserBusiness();
  * Get user
  * @returns {User}
  */
-function get(req, res) {
+function get(req, res, next) {
   _userBusiness.get(req.decoded._id)
     .then(user => {
-      delete user['password'];
-      res.json(_responseFactory.sucess(user));
+      res.json(_responseFactory.success(user.toObject()));
     })
     .catch(e => next(e));
 }
@@ -36,8 +35,7 @@ function create(req, res, next) {
 
   _userBusiness.create(uservm)
     .then(savedUser => {
-      delete user['password'];
-      res.json(_responseFactory.sucess(savedUser)) 
+      res.json(_responseFactory.success(savedUser.toObject())) 
     })
     .catch(e => next(e));
 }
@@ -55,8 +53,7 @@ function update(req, res, next) {
 
   _userBusiness.update(user)
     .then(savedUser => {
-      delete user['password'];
-      res.json(_responseFactory.sucess(savedUser))
+      res.json(_responseFactory.success(savedUser.toObject()))
     })
     .catch(e => next(e));
 }
@@ -72,7 +69,7 @@ function remove(req, res, next) {
 
       tokenBusiness.removeByUser(req.decoded._id);
 
-      res.json(_responseFactory.sucess(status))
+      res.json(_responseFactory.success(status))
     })
     .catch(e => next(e));
 }

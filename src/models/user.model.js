@@ -9,6 +9,10 @@ const UserSchema = new mongoose.Schema({
   email:  { type: 'String', required: true, unique: true },
   password: { type: 'String', required: true },
   created: { type: Date, default: Date.now }
+},
+{ toObject: {
+    transform: function (doc, ret, game) { delete ret.__v; delete ret.password; }
+  }
 });
 
 

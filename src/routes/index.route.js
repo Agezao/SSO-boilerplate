@@ -9,10 +9,10 @@ router.get('/health-check', (req, res) =>
   res.send('OK')
 );
 
-// mount user routes at /users
-router.use('/users', userRoutes);
+// mount user routes at api/user
+router.use('/user', userRoutes);
 
-// mount auth routes at /auth
-router.use('/auth', authRoutes);
+// mount auth routes at api/
+router.use('/', authRoutes);
 
 export default router;
